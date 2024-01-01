@@ -1,23 +1,22 @@
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
-import { getRespose } from "./functions/completion.js";
-
+import dotenv from "dotenv";
 dotenv.config();
+
+import generateRoutes from "./routes/generate.js";
 
 const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
-const PORT = process.env.PORT || 5000;
+app.use("/api/openai", generateRoutes);
 
-getRespose();
+const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.DATABASE_URL, {
-    useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB connected..."))
