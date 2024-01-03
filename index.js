@@ -16,9 +16,7 @@ app.use("/api/openai", generateRoutes);
 const PORT = process.env.PORT || 5000;
 
 mongoose
-  .connect(process.env.DATABASE_URL, {
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.DATABASE_URL)
   .then(() => console.log("MongoDB connected..."))
   .catch((err) => console.log(err));
 
