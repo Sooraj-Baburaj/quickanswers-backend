@@ -3,6 +3,6 @@ import { generateBlog } from "../controllers/generate.js";
 
 const router = express.Router();
 
-router.post("/generate-blog", generateBlog);
+router.post("/create", generateBlog);
 
 export default router;

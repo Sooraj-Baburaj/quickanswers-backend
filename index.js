@@ -11,7 +11,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 import generateRoutes from "./routes/generate.js";
 
-app.use("/api/openai", generateRoutes);
+app.use("/api/generate", generateRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,26 +1,17 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
+
 dotenv.config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_TOKEN,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_TOKEN);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const generateBlog = async (req, res) => {
   const { content } = req.body;
   if (content) {
     try {
-      const stream = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You only give response in html. You are generating blogs. Every response should be in html.",
-          },
-          { role: "user", content },
-        ],
-        stream: true,
+      const result = await model.generateContentStream({
+        contents: [{ role: "user", parts: [{ text: content }] }],
       });
 
       res.writeHead(200, {
@@ -29,14 +20,15 @@ export const generateBlog = async (req, res) => {
         Connection: "keep-alive",
       });
 
-      let finalStreamContent = "";
-
-      for await (const part of stream) {
-        res.write(part.choices[0]?.delta?.content ?? "");
-        finalStreamContent += part.choices[0]?.delta?.content ?? "";
+      let text = "";
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        console.log(chunkText);
+        res.write(chunkText ?? "");
+        text += chunkText;
       }
 
-      console.log(finalStreamContent);
+      console.log(text);
 
       res.end();
     } catch (error) {
