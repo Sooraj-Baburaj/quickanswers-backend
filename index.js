@@ -11,9 +11,11 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 import generateRoutes from "./routes/generate.js";
 import userRoutes from "./routes/users.js";
+import questionRoutes from "./routes/question.js";
 
 app.use("/api/generate", generateRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/question", questionRoutes);
 
 const PORT = process.env.PORT || 5000;
 

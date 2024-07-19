@@ -36,7 +36,10 @@ export const userAuth = async (req, res) => {
     if (user) {
       const result = await bcrypt.compare(req.body.password, user.password);
       if (result) {
-        const token = jwt.sign({ email: user.email }, process.env.SECRET);
+        const token = jwt.sign(
+          { email: user.email, id: user._id },
+          process.env.SECRET
+        );
         res.status(200).json({
           user_access_token: token,
           message: "token created succesfully",
@@ -69,11 +72,6 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    console.log(
-      process.env.NODEMAILER_EMAIL,
-      process.env.NODEMAILER_EMAIL_PASSWORD,
-      "email, pass"
-    );
     const transporter = nodemailer.createTransport({
       host: "smtp.zoho.in",
       port: 465,

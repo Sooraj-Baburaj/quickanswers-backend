@@ -1,18 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_TOKEN);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+import generateContentStream from "../utils/generateContentStream.js";
 
 export const generateBlog = async (req, res) => {
   const { content } = req.body;
   if (content) {
     try {
-      const result = await model.generateContentStream({
-        contents: [{ role: "user", parts: [{ text: content }] }],
-      });
+      const result = await generateContentStream(content);
 
       res.writeHead(200, {
         "Content-Type": "text/event-stream",
