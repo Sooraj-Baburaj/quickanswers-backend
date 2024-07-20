@@ -9,13 +9,18 @@ app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
+import "./typesense/questionsCollection.js";
+import "./typesense/answersCollection.js";
+
 import generateRoutes from "./routes/generate.js";
 import userRoutes from "./routes/users.js";
 import questionRoutes from "./routes/question.js";
+import answerRoutes from "./routes/answer.js";
 
 app.use("/api/generate", generateRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/question", questionRoutes);
+app.use("/api/answer", answerRoutes);
 
 const PORT = process.env.PORT || 5000;
 

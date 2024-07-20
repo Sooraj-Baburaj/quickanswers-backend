@@ -5,6 +5,7 @@ const questionSchema = new mongoose.Schema(
     question: {
       type: String,
       index: true,
+      unique: true,
     },
     askedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -17,6 +18,8 @@ const questionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+questionSchema.index({ question: 1 }, { unique: true });
 
 const Question = mongoose.model("Question", questionSchema);
 

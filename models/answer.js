@@ -7,13 +7,17 @@ const answerSchema = new mongoose.Schema(
       index: true,
       required: true,
     },
-    upvotes: {
+    validityPercentage: {
       type: Number,
       default: 0,
     },
+    upvotes: {
+      type: [mongoose.Schema.Types.ObjectId],
+      default: [],
+    },
     downvotes: {
-      type: Number,
-      default: 0,
+      type: [mongoose.Schema.Types.ObjectId],
+      default: [],
     },
     verifiedByQuickAnswers: {
       type: Boolean,
