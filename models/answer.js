@@ -33,6 +33,8 @@ const answerSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    viewCount: { type: Number, default: 0 },
+    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

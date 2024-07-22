@@ -3,6 +3,7 @@ import Question from "../models/question.js";
 import typesenseClient from "../typesense/client.js";
 import generateContentStream from "../utils/generateContentStream.js";
 
+/******** GET ANSWER ***********/
 export const getAnswer = async (req, res) => {
   try {
     const { questionId } = req.params;
@@ -16,44 +17,43 @@ export const getAnswer = async (req, res) => {
         .json({ message: "Question not found", error: true });
     }
 
-    const userAnswer = await Answer.findOne({
-      questionId,
-      askedBy: userId,
-    }).lean();
-
-    if (userAnswer) {
-      userAnswer.upvotes = userAnswer.upvotes.length;
-      userAnswer.downvotes = userAnswer.downvotes.length;
-      return res.status(200).json({
-        data: userAnswer,
-        message: "Answer retrieved successfully",
-        error: false,
-      });
-    }
-
-    const topAnswer = await Answer.findOne({ questionId })
+    const answer = await Answer.findOne({ questionId })
       .sort({
         validityPercentage: -1,
       })
       .lean();
 
-    if (topAnswer) {
-      topAnswer.upvotes = topAnswer.upvotes.length;
-      topAnswer.downvotes = topAnswer.downvotes.length;
-      return res.status(200).json({
-        data: topAnswer,
-        message: "Answer retrieved successfully",
-        error: false,
-      });
+    if (!answer) {
+      return res.status(404).json({ message: "No answer found", error: false });
     }
 
-    res.status(404).json({ message: "No answer found", error: false });
+    if (!answer.viewedBy.includes(userId)) {
+      await Answer.updateOne(
+        { _id: answer._id },
+        {
+          $inc: { viewCount: 1 },
+          $push: { viewedBy: userId },
+        }
+      );
+      answer.viewCount += 1;
+      answer.viewedBy.push(userId);
+    }
+
+    answer.upvotes = answer.upvotes.length;
+    answer.downvotes = answer.downvotes.length;
+
+    return res.status(200).json({
+      data: answer,
+      message: "Answer retrieved successfully",
+      error: false,
+    });
   } catch (error) {
-    console.error("Generate Answer Error:", error);
+    console.error("Get Answer Error:", error);
     res.status(500).json({ message: "Server error", error: true });
   }
 };
 
+/******** GENERATE ANSWER ***********/
 export const generateAnswer = async (req, res) => {
   try {
     const { questionId } = req.body;
@@ -79,7 +79,6 @@ export const generateAnswer = async (req, res) => {
       res.write(chunkText ?? "");
       answer += chunkText;
     }
-    // res.write("event: end\ndata: end\n\n");
     res.end();
 
     const newAnswer = new Answer({
@@ -105,6 +104,35 @@ export const generateAnswer = async (req, res) => {
     }
   } catch (error) {
     console.error("Generate Answer Error:", error);
+    res.status(500).json({ message: "Server error", error: true });
+  }
+};
+
+/****** RELATED ANSWERS ******/
+export const listOtherAnswers = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    const question = await Question.findById(questionId);
+
+    if (!question) {
+      return res
+        .status(400)
+        .json({ message: "Question doesn't exist!", error: true });
+    }
+
+    const answers = await Answer.find({
+      questionId,
+      _id: { $ne: question.answerId },
+    });
+
+    res.status(200).json({
+      data: answers,
+      error: false,
+      message: "Answers listed succesfully",
+    });
+  } catch (error) {
+    console.error("Related Answer Error:", error);
     res.status(500).json({ message: "Server error", error: true });
   }
 };
