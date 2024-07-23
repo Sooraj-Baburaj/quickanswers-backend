@@ -19,8 +19,8 @@ import answerRoutes from "./routes/answer.js";
 
 app.use("/api/generate", generateRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/question", questionRoutes);
-app.use("/api/answer", answerRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/answers", answerRoutes);
 
 const PORT = process.env.PORT || 5000;
 

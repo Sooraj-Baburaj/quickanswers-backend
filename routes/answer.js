@@ -4,11 +4,13 @@ import {
   generateAnswer,
   getAnswer,
   listOtherAnswers,
+  searchAnswer,
 } from "../controllers/answer.js";
 
 const router = express.Router();
 
 router.post("/generate", isAuthorized, generateAnswer);
+router.post("/search", isAuthorized, searchAnswer);
 router.get("/get/:questionId", isAuthorized, getAnswer);
 router.get("/list-others/:questionId", isAuthorized, listOtherAnswers);
 

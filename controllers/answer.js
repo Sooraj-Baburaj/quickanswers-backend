@@ -1,3 +1,4 @@
+import { transformTypesenseResult } from "../helpers/tranformTypesenseResult.js";
 import Answer from "../models/answer.js";
 import Question from "../models/question.js";
 import typesenseClient from "../typesense/client.js";
@@ -88,6 +89,11 @@ export const generateAnswer = async (req, res) => {
 
     await newAnswer.save();
 
+    if (!question.answerId) {
+      question.answerId = newAnswer._id;
+      await question.save();
+    }
+
     try {
       await typesenseClient.collections("answers").documents().create({
         id: newAnswer._id.toString(),
@@ -134,5 +140,53 @@ export const listOtherAnswers = async (req, res) => {
   } catch (error) {
     console.error("Related Answer Error:", error);
     res.status(500).json({ message: "Server error", error: true });
+  }
+};
+
+/******** SEARCH ANSWER *******/
+export const searchAnswer = async (req, res) => {
+  try {
+    const { search, page = 1, per_page = 10 } = req.body;
+
+    if (!search) {
+      return res
+        .status(400)
+        .json({ message: "search is required", error: true });
+    }
+
+    if (search.length < 3) {
+      return res
+        .status(400)
+        .json({ message: "search at least 3 letters", error: true });
+    }
+
+    try {
+      const answerResult = await typesenseClient
+        .collections("answers")
+        .documents()
+        .search({
+          q: search,
+          query_by: "answer,embedding",
+          vector_query: "embedding:([], alpha: 0.5, distance_threshold:0.60)",
+          sort_by: "_vector_distance:asc",
+          page,
+          per_page,
+        });
+
+      if (answerResult) {
+        return res.status(200).json({
+          data: transformTypesenseResult(answerResult),
+          error: false,
+        });
+      }
+
+      return res.status(400).json({ message: "Search Failed", error: true });
+    } catch (err) {
+      console.log("Search Error:", err);
+      return res.status(500).json({ message: "Server error", error: true });
+    }
+  } catch (error) {
+    console.error("Search Question Error:", error);
+    return res.status(500).json({ message: "Server error", error: true });
   }
 };

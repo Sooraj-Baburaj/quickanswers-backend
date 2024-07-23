@@ -76,31 +76,21 @@ export const searchQuestions = async (req, res) => {
     }
 
     try {
-      const [questionResult, answerResult] = await Promise.all([
-        typesenseClient.collections("questions").documents().search({
+      const questionResult = await typesenseClient
+        .collections("questions")
+        .documents()
+        .search({
           q: search,
           query_by: "question,embedding",
           vector_query: "embedding:([], alpha: 0.5, distance_threshold:0.60)",
           sort_by: "_vector_distance:asc",
           page,
           per_page,
-        }),
-        typesenseClient.collections("answers").documents().search({
-          q: search,
-          query_by: "answer,embedding",
-          vector_query: "embedding:([], alpha: 0.5, distance_threshold:0.60)",
-          sort_by: "_vector_distance:asc",
-          page,
-          per_page,
-        }),
-      ]);
+        });
 
-      if (questionResult || answerResult) {
+      if (questionResult) {
         return res.status(200).json({
-          data: {
-            questions: transformTypesenseResult(questionResult),
-            answers: transformTypesenseResult(answerResult),
-          },
+          data: transformTypesenseResult(questionResult),
           error: false,
         });
       }

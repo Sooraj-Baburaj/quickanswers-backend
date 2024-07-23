@@ -8,11 +8,13 @@ export const transformTypesenseResult = (result) => {
     delete result.out_of;
   }
 
-  result.hits = result.hits.map((hit) => {
+  result.results = result.hits.map((hit) => {
     delete hit.document.embedding;
     delete hit.highlights;
     return hit;
   });
+
+  delete result.hits;
 
   return result;
 };
