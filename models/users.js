@@ -1,9 +1,15 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+  displayName: {
+    type: String,
+  },
+  profilePhoto: {
+    type: String,
+  },
   username: {
     type: String,
-    index: true,
+    unique: true,
   },
   email: {
     type: String,

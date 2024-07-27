@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.1",
     "nodemailer": "^6.9.14",
-    "typesense": "^1.8.2"
+    "typesense": "^1.8.2",
+    "uuid": "^10.0.0"
   }
 }

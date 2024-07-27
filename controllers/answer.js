@@ -10,7 +10,7 @@ export const getAnswer = async (req, res) => {
     const { questionId } = req.params;
     const question = await Question.findById(questionId);
 
-    const userId = req.user.id;
+    const user = req.user;
 
     if (!question) {
       return res
@@ -28,23 +28,37 @@ export const getAnswer = async (req, res) => {
       return res.status(404).json({ message: "No answer found", error: false });
     }
 
-    if (!answer.viewedBy.includes(userId)) {
-      await Answer.updateOne(
-        { _id: answer._id },
-        {
-          $inc: { viewCount: 1 },
-          $push: { viewedBy: userId },
-        }
-      );
-      answer.viewCount += 1;
-      answer.viewedBy.push(userId);
+    if (!user?.isGuest) {
+      if (!question.viewedBy.includes(user.id)) {
+        await Question.updateOne(
+          { _id: answer._id },
+          {
+            $inc: { viewCount: 1 },
+            $push: { viewedBy: user.id },
+          }
+        );
+        question.viewCount += 1;
+        question.viewedBy.push(user.id);
+      }
+    } else {
+      if (!question.viewedByGuests.includes(user.id)) {
+        await Question.updateOne(
+          { _id: answer._id },
+          {
+            $inc: { viewCount: 1 },
+            $push: { viewedByGuests: user.id },
+          }
+        );
+        question.viewCount += 1;
+        question.viewedByGuests.push(user.id);
+      }
     }
 
-    answer.upvotes = answer.upvotes.length;
-    answer.downvotes = answer.downvotes.length;
+    question.upvotes = question.upvotes.length;
+    question.downvotes = question.downvotes.length;
 
     return res.status(200).json({
-      data: answer,
+      data: { question, answer },
       message: "Answer retrieved successfully",
       error: false,
     });

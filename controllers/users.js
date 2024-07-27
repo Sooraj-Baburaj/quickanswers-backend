@@ -5,8 +5,10 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
 import User from "../models/users.js";
+import { v4 as uuidv4 } from "uuid";
 
-export const createUser = async (req, res) => {
+/******* REGISTER USER *******/
+export const registerUser = async (req, res) => {
   try {
     if (!req.body.email) {
       res.status(400).json({ message: "Email is required", error: true });
@@ -30,6 +32,7 @@ export const createUser = async (req, res) => {
   }
 };
 
+/******* LOGIN USER *******/
 export const userAuth = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -41,7 +44,7 @@ export const userAuth = async (req, res) => {
           process.env.SECRET
         );
         res.status(200).json({
-          user_access_token: token,
+          data: { user_access_token: token },
           message: "token created succesfully",
         });
       } else {
@@ -55,6 +58,7 @@ export const userAuth = async (req, res) => {
   }
 };
 
+/******* FORGOT PASSWORD *******/
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -102,6 +106,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+/******* RESET PASSWORD *******/
 export const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
@@ -133,6 +138,19 @@ export const resetPassword = async (req, res) => {
       res
         .status(200)
         .json({ message: "Password reset successfully", error: false });
+    });
+  } catch (error) {
+    res.status(500).json({ error, message: "Internal server error" });
+  }
+};
+
+export const createGuestUser = async (req, res) => {
+  try {
+    const id = uuidv4();
+    const token = jwt.sign({ isGuest: true, id }, process.env.SECRET);
+    res.status(200).json({
+      data: { user_access_token: token },
+      message: "token created succesfully",
     });
   } catch (error) {
     res.status(500).json({ error, message: "Internal server error" });

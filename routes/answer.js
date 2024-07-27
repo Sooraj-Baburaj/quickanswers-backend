@@ -1,17 +1,18 @@
 import express from "express";
-import isAuthorized from "../middlewares/auth.js";
+import isAuthorized from "../middlewares/isAuthorized.js";
 import {
   generateAnswer,
   getAnswer,
   listOtherAnswers,
   searchAnswer,
 } from "../controllers/answer.js";
+import isGuestOrUser from "../middlewares/isGuestOrUser.js";
 
 const router = express.Router();
 
 router.post("/generate", isAuthorized, generateAnswer);
-router.post("/search", isAuthorized, searchAnswer);
-router.get("/get/:questionId", isAuthorized, getAnswer);
-router.get("/list-others/:questionId", isAuthorized, listOtherAnswers);
+router.post("/search", searchAnswer);
+router.get("/get/:questionId", isGuestOrUser, getAnswer);
+router.get("/list-others/:questionId", isGuestOrUser, listOtherAnswers);
 
 export default router;

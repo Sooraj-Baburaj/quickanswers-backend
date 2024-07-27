@@ -15,11 +15,12 @@ const questionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Answer",
     },
+    viewCount: { type: Number, default: 0 },
+    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    viewedByGuests: [{ type: [String] }],
   },
   { timestamps: true }
 );
-
-questionSchema.index({ question: 1 }, { unique: true });
 
 const Question = mongoose.model("Question", questionSchema);
 

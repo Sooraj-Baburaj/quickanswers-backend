@@ -1,17 +1,16 @@
 import jwt from "jsonwebtoken";
 
-// MIDDLEWARE FOR AUTHORIZATION (MAKING SURE THEY ARE LOGGED IN)
-const isAuthorized = (req, res, next) => {
+const isAdmin = (req, res, next) => {
   try {
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(" ")[1];
       if (token) {
         const user = jwt.verify(token, process.env.SECRET);
-        if (user) {
+        if (user && user?.isAdmin) {
           req.user = user;
           next();
         } else {
-          res.status(400).json({ message: "invalid token", error: true });
+          res.status(401).json({ message: "invalid token", error: true });
         }
       } else {
         res.status(400).json({ message: "malformed auth header", error: true });
@@ -24,4 +23,4 @@ const isAuthorized = (req, res, next) => {
   }
 };
 
-export default isAuthorized;
+export default isAdmin;
