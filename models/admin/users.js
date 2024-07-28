@@ -1,18 +1,11 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  displayName: {
-    type: String,
-  },
+const adminUserSchema = new mongoose.Schema({
   profilePhoto: {
-    type: String,
-  },
-  googleId: {
     type: String,
   },
   username: {
     type: String,
-    unique: true,
   },
   email: {
     type: String,
@@ -22,11 +15,12 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
+    required: true,
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 });
 
-const User = mongoose.model("User", userSchema);
+const AdminUser = mongoose.model("AdminUser", adminUserSchema);
 
-export default User;
+export default AdminUser;

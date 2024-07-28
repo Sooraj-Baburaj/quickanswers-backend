@@ -3,6 +3,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { OAuth2Client } from "google-auth-library";
 
 import User from "../models/users.js";
 import { v4 as uuidv4 } from "uuid";
@@ -55,6 +56,47 @@ export const userAuth = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error, message: "Internal server error" });
+  }
+};
+
+/******* GOOGLE LOGIN *******/
+export const googleLogin = async (req, res) => {
+  try {
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    const { token } = req.body;
+    if (!token) {
+      return res.send(400).json({ message: "Token is required", error: true });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const { sub, email, name, picture } = ticket.getPayload();
+
+    let user = await User.findOne({ googleId: sub });
+
+    if (!user) {
+      user = new User({
+        googleId: sub,
+        displayName: name,
+        email,
+        profilePhoto: picture,
+      });
+      await user.save();
+    }
+
+    // Create JWT token
+    const jwtToken = jwt.sign({ email, id: user._id }, "your_jwt_secret", {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({ data: { user_access_token: jwtToken, user } });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Authentication failed" });
   }
 };
 
@@ -152,31 +194,6 @@ export const createGuestUser = async (req, res) => {
       data: { user_access_token: token },
       message: "token created succesfully",
     });
-  } catch (error) {
-    res.status(500).json({ error, message: "Internal server error" });
-  }
-};
-
-/**************Dashboard************/
-
-export const listUsers = async (req, res) => {
-  try {
-    const users = await User.find({}, "email");
-    res.status(200).json({ users, status: "success" });
-  } catch (error) {
-    res.status(500).json({ error, message: "Internal server error" });
-  }
-};
-
-export const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findByIdAndDelete(id);
-    if (user) {
-      res.status(200).json({ message: "User deleted successfully" });
-    } else {
-      res.status(400).json({ message: "User not found", error: true });
-    }
   } catch (error) {
     res.status(500).json({ error, message: "Internal server error" });
   }

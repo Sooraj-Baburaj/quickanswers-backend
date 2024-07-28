@@ -16,9 +16,11 @@ import generateRoutes from "./routes/generate.js";
 import userRoutes from "./routes/users.js";
 import questionRoutes from "./routes/question.js";
 import answerRoutes from "./routes/answer.js";
+import adminRoutes from "./routes/admin/adminRoutes.js";
 
 app.use("/api/generate", generateRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/answers", answerRoutes);
 
