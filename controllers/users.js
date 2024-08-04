@@ -89,14 +89,16 @@ export const googleLogin = async (req, res) => {
     }
 
     // Create JWT token
-    const jwtToken = jwt.sign({ email, id: user._id }, "your_jwt_secret", {
-      expiresIn: "1h",
-    });
+    const jwtToken = jwt.sign({ email, id: user._id }, process.env.SECRET);
 
     res.status(200).json({ data: { user_access_token: jwtToken, user } });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: "Authentication failed" });
+    if (error?.code === 11000) {
+      res.status(400).json({ message: "Email already exists!", error: true });
+    } else {
+      res.status(400).json({ message: "Authentication failed" });
+    }
   }
 };
 

@@ -4,6 +4,13 @@ const questionSchema = {
   name: "questions",
   fields: [
     { name: "question", type: "string" },
+    { name: "description", type: "string" },
+    { name: "answer", type: "string" },
+    { name: "viewCount", type: "int32" },
+    {
+      name: "createdAt",
+      type: "int32",
+    },
     {
       name: "embedding",
       type: "float[]",

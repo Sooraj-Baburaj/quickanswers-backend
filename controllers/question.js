@@ -2,55 +2,83 @@ import { transformTypesenseResult } from "../helpers/tranformTypesenseResult.js"
 import Question from "../models/question.js";
 import typesenseClient from "../typesense/client.js";
 
-export const createQuestion = async (req, res) => {
-  const question = req.body?.question;
+export const putQuestion = async (req, res) => {
+  const { id, question, description } = req.body;
   if (!question) {
     return res
       .status(400)
       .json({ message: "Question is required", error: true });
   }
-  if (question.length < 10) {
+  if (question.length < 5) {
     return res.status(400).json({
-      message: "Question should have at least 10 letters",
+      message: "Question should have at least 5 letters",
       error: true,
     });
   }
 
   try {
-    const newQuestion = new Question({
-      question,
-      askedBy: req.user.id,
-    });
+    if (id) {
+      // If id is provided, update the existing question
+      const existingQuestion = await Question.findById(id);
+      if (!existingQuestion) {
+        return res
+          .status(404)
+          .json({ message: "Question not found", error: true });
+      }
 
-    await newQuestion.save();
+      existingQuestion.question = question;
+      existingQuestion.description =
+        description || existingQuestion.description;
 
-    try {
-      await typesenseClient.collections("questions").documents().create({
-        id: newQuestion._id.toString(),
-        question,
-      });
-    } catch (typesenseError) {
-      console.error(
-        "Failed to sync with Typesense",
-        typesenseError,
-        "QuestionId:",
-        newQuestion._id
-      );
-    }
+      await existingQuestion.save();
 
-    res.status(200).json({
-      data: newQuestion,
-      message: "Question created successfully!",
-      error: false,
-    });
-  } catch (error) {
-    console.error("Create Question Error:", error);
-    if (error.code === 11000) {
-      // Handle duplicate key error
-      const existingQuestion = await Question.findOne({ question });
+      try {
+        await typesenseClient
+          .collections("questions")
+          .documents(existingQuestion._id.toString())
+          .update({
+            question,
+            description: description || existingQuestion.description,
+            updatedAt: new Date().getTime(),
+          });
+      } catch (typesenseError) {
+        console.error(
+          "Failed to sync with Typesense",
+          typesenseError,
+          "QuestionId:",
+          existingQuestion._id
+        );
+      }
+
       return res.status(200).json({
         data: existingQuestion,
-        message: "Question fetched successfully!",
+        message: "Question updated successfully!",
+        error: false,
+      });
+    } else {
+      // If no id is provided, create a new question
+      const newQuestion = new Question({
+        question,
+        askedBy: req.user.id,
+        description,
+      });
+
+      await newQuestion.save();
+
+      return res.status(200).json({
+        data: newQuestion,
+        message: "Question created successfully!",
+        error: false,
+      });
+    }
+  } catch (error) {
+    console.error("Create/Update Question Error:", error);
+    if (error.code === 11000) {
+      // Handle duplicate key error (question in this case)
+      const existingQuestion = await Question.findOne({ question });
+      return res.status(409).json({
+        data: existingQuestion,
+        message: "Question already exists!",
         error: false,
       });
     }

@@ -10,10 +10,10 @@ const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
   },
-  username: {
-    type: String,
-    unique: true,
-  },
+  // username: {
+  //   type: String,
+  //   unique: true,
+  // },
   email: {
     type: String,
     index: true,

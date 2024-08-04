@@ -54,6 +54,22 @@ export const getAnswer = async (req, res) => {
       }
     }
 
+    try {
+      await typesenseClient
+        .collections("questions")
+        .documents(question._id.toString())
+        .update({
+          viewCount: question.viewCount,
+        });
+    } catch (typesenseError) {
+      console.error(
+        "Failed to sync with Typesense",
+        typesenseError,
+        "QuestionId:",
+        existingQuestion._id
+      );
+    }
+
     question.upvotes = question.upvotes.length;
     question.downvotes = question.downvotes.length;
 
@@ -106,6 +122,23 @@ export const generateAnswer = async (req, res) => {
     if (!question.answerId) {
       question.answerId = newAnswer._id;
       await question.save();
+    }
+
+    try {
+      await typesenseClient.collections("questions").documents().create({
+        id: question._id.toString(),
+        question: question.question,
+        description: question.description,
+        createdAt: question.createdAt.getTime(),
+        answer,
+      });
+    } catch (typesenseError) {
+      console.error(
+        "Failed to sync with Typesense",
+        typesenseError,
+        "QuestionId:",
+        newQuestion._id
+      );
     }
 
     try {

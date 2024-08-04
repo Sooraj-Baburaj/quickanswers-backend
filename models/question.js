@@ -7,6 +7,9 @@ const questionSchema = new mongoose.Schema(
       index: true,
       unique: true,
     },
+    description: {
+      type: String,
+    },
     askedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
