@@ -20,8 +20,6 @@ export const generateBlog = async (req, res) => {
         text += chunkText;
       }
 
-      console.log(text);
-
       res.end();
     } catch (error) {
       res.status(500).json({ error });

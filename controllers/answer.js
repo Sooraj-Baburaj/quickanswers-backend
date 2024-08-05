@@ -110,6 +110,7 @@ export const generateAnswer = async (req, res) => {
       res.write(chunkText ?? "");
       answer += chunkText;
     }
+
     res.end();
 
     const newAnswer = new Answer({
@@ -137,7 +138,7 @@ export const generateAnswer = async (req, res) => {
         "Failed to sync with Typesense",
         typesenseError,
         "QuestionId:",
-        newQuestion._id
+        question._id
       );
     }
 
