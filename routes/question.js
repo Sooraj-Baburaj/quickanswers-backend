@@ -1,11 +1,17 @@
 import express from "express";
-import { putQuestion, searchQuestions } from "../controllers/question.js";
-import isAuthorized from "../middlewares/isAuthorized.js";
+import {
+  findExistingQuestion,
+  getQuestion,
+  putQuestion,
+  searchQuestions,
+} from "../controllers/question.js";
 import isGuestOrUser from "../middlewares/isGuestOrUser.js";
 
 const router = express.Router();
 
-router.post("/upsert", isAuthorized, putQuestion);
+router.get("/get/:id", isGuestOrUser, getQuestion);
+router.post("/find-existing-question", isGuestOrUser, findExistingQuestion);
+router.post("/upsert", isGuestOrUser, putQuestion);
 router.post("/search", isGuestOrUser, searchQuestions);
 
 export default router;

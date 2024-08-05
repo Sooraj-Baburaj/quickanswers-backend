@@ -86,6 +86,48 @@ export const putQuestion = async (req, res) => {
   }
 };
 
+/******** FIND EXISTING QUESTION *******/
+export const findExistingQuestion = async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    const questionData = await Question.findOne({ question });
+
+    if (questionData) {
+      res.status(200).json({
+        data: questionData,
+        success: true,
+        message: "Question fetched successfully",
+      });
+    } else {
+      res.status(404).json({ success: false, message: "Question not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: true });
+  }
+};
+
+/******** GET QUESTION *******/
+export const getQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const question = await Question.findById(id);
+
+    if (question) {
+      res.status(200).json({
+        data: question,
+        success: true,
+        message: "Question fetched successfully",
+      });
+    } else {
+      res.status(404).json({ success: false, message: "Question not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: true });
+  }
+};
+
 /******** SEARCH QUESTION *******/
 export const searchQuestions = async (req, res) => {
   try {
