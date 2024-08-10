@@ -131,6 +131,7 @@ export const generateAnswer = async (req, res) => {
         question: question.question,
         description: question.description,
         createdAt: question.createdAt.getTime(),
+        viewCount: question.viewCount,
         answer,
       });
     } catch (typesenseError) {
