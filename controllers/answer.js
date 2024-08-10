@@ -66,12 +66,12 @@ export const getAnswer = async (req, res) => {
         "Failed to sync with Typesense",
         typesenseError,
         "QuestionId:",
-        existingQuestion._id
+        question._id
       );
     }
 
-    question.upvotes = question.upvotes.length;
-    question.downvotes = question.downvotes.length;
+    answer.upvotes = answer.upvotes.length;
+    answer.downvotes = answer.downvotes.length;
 
     return res.status(200).json({
       data: { question, answer },
@@ -142,20 +142,20 @@ export const generateAnswer = async (req, res) => {
       );
     }
 
-    try {
-      await typesenseClient.collections("answers").documents().create({
-        id: newAnswer._id.toString(),
-        answer,
-        validityPercentage: newAnswer.validityPercentage,
-      });
-    } catch (typesenseError) {
-      console.error(
-        "Failed to sync with Typesense",
-        typesenseError,
-        "AnswerId:",
-        newAnswer._id
-      );
-    }
+    // try {
+    //   await typesenseClient.collections("answers").documents().create({
+    //     id: newAnswer._id.toString(),
+    //     answer,
+    //     validityPercentage: newAnswer.validityPercentage,
+    //   });
+    // } catch (typesenseError) {
+    //   console.error(
+    //     "Failed to sync with Typesense",
+    //     typesenseError,
+    //     "AnswerId:",
+    //     newAnswer._id
+    //   );
+    // }
   } catch (error) {
     console.error("Generate Answer Error:", error);
     res.status(500).json({ message: "Server error", error: true });
